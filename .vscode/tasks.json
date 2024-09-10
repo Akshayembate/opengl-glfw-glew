@@ -1,0 +1,35 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "type": "cppbuild",
+            "label": "C/C++: g++.exe build active file",
+            "command": "C:/mingw64/bin/g++.exe",
+            "args": [
+                "-g",
+                "-std=c++17",
+                "-I${workspaceFolder}/include",
+                //"-I${workspaceFolder}/include/GLFW",
+                "-L${workspaceFolder}/lib/glew",
+                "-L${workspaceFolder}/lib/glfw",
+                "${workspaceFolder}/src/application.cpp",
+                "-lglfw3dll",
+                "-lglew32",     // Link GLEW correctly
+                "-lopengl32",   // Link OpenGL
+                "-o",
+                "${workspaceFolder}/executable.exe"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "detail": "compiler: C:/mingw64/bin/g++.exe"
+        }
+    ]
+}
