@@ -2,34 +2,44 @@
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
-using namespace std;
-
 int main()
 {
+   GLFWwindow* window;
+
+    /* Initialize the library */
     if (!glfwInit())
+        return -1;
+
+    /* Create a windowed mode window and its OpenGL context */
+    window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
+    if (!window)
     {
-        cout << "Failed to initialize GLFW" << endl;
+        glfwTerminate();
         return -1;
     }
 
-    glfwWindowHint(GLFW_SAMPLES, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-    GLFWwindow* window;
-    window = glfwCreateWindow(1000, 700, "Test window 01", NULL, NULL);
-    if (window == NULL)
-    {
-        cout << "Failed to open GLFW window" << endl;
-        return -1;
-    }
+    /* Make the window's context current */
     glfwMakeContextCurrent(window);
 
-    glewExperimental = true;
-    if(glewInit() != GLEW_OK)
+    /* Loop until the user closes the window */
+    while (!glfwWindowShouldClose(window))
     {
-        cout << "Failed to initialize GLEW" << endl;
-        return -1;
+        /* Render here */
+        glClear(GL_COLOR_BUFFER_BIT);
+
+        glBegin(GL_TRIANGLES);
+        glVertex2d(-0.5f, -0.5f);
+        glVertex2d(0.0f, 0.5f);
+        glVertex2d(0.5f, -0.5f);
+        glEnd();
+
+        /* Swap front and back buffers */
+        glfwSwapBuffers(window);
+
+        /* Poll for and process events */
+        glfwPollEvents();
     }
+
+    glfwTerminate();
+    return 0;
 }
