@@ -20,7 +20,9 @@
                 "${workspaceFolder}/executable.exe"
             ],
             "options": {
-                "cwd": "${workspaceFolder}"
+                "cwd": "${workspaceFolder}",
+                //"env": {
+                //    "PATH" : "${workspaceFolder}/bin:${env:PATH}"}
             },
             "problemMatcher": [
                 "$gcc"
