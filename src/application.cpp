@@ -1,7 +1,55 @@
 #include <iostream>
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
+#include <fstream> // added for reading the files
+#include <string>
+#include <sstream> 
 
+struct shaderProgramSource
+{
+    std::string vertexSource;
+    std::string fragmentSource;
+};
+
+static shaderProgramSource paraseShader(const std::string& filePath)
+{
+    // input file stream 
+    std::ifstream stream(filePath);
+    if (!stream)
+        std::cout << "failed to open file: " << filePath << "\n";
+
+    enum class shaderType
+    {
+        NONE = -1, VERTEX = 0, FRAGMENT = 1
+    };
+
+    std::string line;
+    std::stringstream ss[2];
+
+    shaderType type = shaderType::NONE;
+
+    while (getline(stream, line))
+    {
+        if (line.find("#shader") != std::string::npos)
+        {
+            if (line.find("vertex") != std::string::npos)
+            {
+                // set mode to vertex
+                type = shaderType::VERTEX;
+            }
+            else if (line.find("fragment") != std::string::npos)
+            {
+                // set mode to fragment
+                type = shaderType::FRAGMENT;
+            }
+        }
+        else
+        {
+            ss[(int)type] << line << "\n";
+        }
+    }
+    return {ss[0].str(),ss[1].str()};
+}
 
 // function for compile shader for specified type like vertex shader or fragment type
 static unsigned int compileShader(unsigned int type, const std::string& source)
@@ -124,30 +172,13 @@ int main()
     // Specify how the vertex data is structured
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
 
-    // vertex shader
-    std::string vertexShader =
-    "#version 330 core\n"
-    "\n"
-    "layout(location = 0) in vec4 position;\n"
-    "\n"
-    "void main()\n"
-    "{\n"
-    "gl_Position = position;\n"
-    "}\n";
+    shaderProgramSource source = paraseShader("C:/Users/anscer/Desktop/me/cpp/openGl/started - openGL - glfw - glew/res/shader/basic.shader");
 
-    // fragment shader
-    std::string fragmentShader = 
-    "#version 330 core\n"
-    "\n"
-    "layout(location = 0) out vec4 color;\n"
-    "\n"
-    "void main()\n" 
-    "{\n"
-    "color = vec4(1.0, 0.0, 0.0, 1.0);\n"
-    "}\n";
+    std::cout << "vertex shader: " << source.vertexSource << "\n";
+    std::cout << "fragment shader: " << source.fragmentSource << "\n"; 
 
     // calling shader program
-    unsigned int shader = createShader(vertexShader,fragmentShader);
+    unsigned int shader = createShader(source.vertexSource,source.fragmentSource);
 
     // bind the shader
     glUseProgram(shader);
@@ -169,7 +200,7 @@ int main()
     }
 
     // delete the shader program
-    glDeleteShader(shader);
+    glDeleteProgram(shader);
 
     // Cleanup and close the window
     glfwTerminate();
