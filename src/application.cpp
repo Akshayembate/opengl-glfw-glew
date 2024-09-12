@@ -150,10 +150,14 @@ int main()
     std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << "\n";
 
     // Define vertices for a triangle
-    float position[6] = {
+    float position[] = {
         -0.5f, -0.5f, // Vertex 1
-         0.0f,  0.5f, // Vertex 2
-         0.5f, -0.5f  // Vertex 3
+         0.5f, -0.5f, // Vertex 2
+         0.5f,  0.5f, // Vertex 3
+
+         0.5f,  0.5f, // Vertex 1
+        -0.5f,  0.5f, // Vertex 2
+        -0.5f, -0.5f  // Vertex 3
     };
 
     // Generate a buffer
@@ -190,7 +194,7 @@ int main()
         glClear(GL_COLOR_BUFFER_BIT);
 
         // Draw the triangle (3 vertices)
-        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glDrawArrays(GL_TRIANGLES, 0, 6);
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
