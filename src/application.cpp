@@ -5,6 +5,46 @@
 #include <string>
 #include <sstream> 
 
+// adding asser function for using error debug
+#define ASSERT(x) if (!(x)) __debugbreak();
+
+// another methode by using macro
+// in this passing a variable x to  the function glcall
+// first glclearerror will execute
+// then x is executed which means the function which is wrapooed in sid ethe glcall
+// once that is done the gllogcall will check the erros 
+// if te error is there it will stop the execution otherwise resume.
+// the funtion gllogcall is taiking arguments 
+//  #x  (stringified version of x basically it is the function name will send as a string)
+#define GLCall(x) glClearError();\
+    x;\
+    ASSERT(glLogCall(#x, __FILE__,__LINE__))
+
+// error handeling
+static void glClearError()
+{
+    // when there is error call this should be reset sll the other errors 
+    while (glGetError() != GL_NO_ERROR)
+    {
+        // code for error clearing 
+    }   
+}
+
+// print error by using glGetError from opengl
+// adding more contents to the function like the function name , line etc
+static bool glLogCall(const char* function, const char* file, int line)
+{
+    // function for print error
+    while (GLenum error = glGetError())
+    {
+        std::cout << "(openGl error : " << error << "), function : "
+        << function << " file name : " << file << " line number : " << line 
+        <<"\n";
+        return false;
+    }
+    return true;
+}
+
 struct shaderProgramSource
 {
     std::string vertexSource;
@@ -210,9 +250,16 @@ int main()
     {
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
+ 
+        // clearing the errors
+        //glClearError();
 
         // drawing rectangle from index array
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+        GLCall(glDrawElements(GL_TRIANGLES, 6, GL_INT, nullptr));
+
+        // checking the errors in opengl
+        // by using assert we can stop the execution 
+        //ASSERT(glLogCall());
 
         // Draw the triangle (3 vertices)
         glDrawArrays(GL_TRIANGLES, 0, 6);
