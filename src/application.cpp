@@ -151,13 +151,20 @@ int main()
 
     // Define vertices for a triangle
     float position[] = {
-        -0.5f, -0.5f, // Vertex 1
-         0.5f, -0.5f, // Vertex 2
-         0.5f,  0.5f, // Vertex 3
+        -0.5f, -0.5f, // Vertex 1  index 0
+         0.5f, -0.5f, // Vertex 2  index 1
+         0.5f,  0.5f, // Vertex 3  index 2
 
-         0.5f,  0.5f, // Vertex 1
-        -0.5f,  0.5f, // Vertex 2
-        -0.5f, -0.5f  // Vertex 3
+        // 0.5f,  0.5f, // Vertex 1
+        -0.5f,  0.5f, // Vertex 2   index 3
+        //-0.5f, -0.5f  // Vertex 3
+    };
+
+    // index buffer 
+    int index[] =
+    {
+        0, 1, 2 ,// index = 0, 1, 2 for the first triangle
+        2, 3, 0 // index = 2, 3, 0 for the second triangle
     };
 
     // Generate a buffer
@@ -176,6 +183,17 @@ int main()
     // Specify how the vertex data is structured
     glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(float), (void*)0);
 
+    // for making the index buffer algoritam
+    // Generate a buffer
+    unsigned int ibo;
+    glGenBuffers(1, &ibo);
+
+    // Bind the buffer to the GL_ARRAY_BUFFER target
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+
+    // Upload the vertex data to the GPU
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(index), index, GL_STATIC_DRAW);
+
     shaderProgramSource source = paraseShader("C:/Users/anscer/Desktop/me/cpp/openGl/started - openGL - glfw - glew/res/shader/basic.shader");
 
     std::cout << "vertex shader: " << source.vertexSource << "\n";
@@ -192,6 +210,9 @@ int main()
     {
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
+
+        // drawing rectangle from index array
+        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
 
         // Draw the triangle (3 vertices)
         glDrawArrays(GL_TRIANGLES, 0, 6);
