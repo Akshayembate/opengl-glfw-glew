@@ -124,8 +124,8 @@ static unsigned int compileShader(unsigned int type, const std::string& source)
 
         // retrieves the shader compilation log and stores in buffer
         glGetShaderInfoLog(id, length, &length, message);
-        std::cout << "falied to compile " << (type == GL_VERTEX_SHADER ? "vertex" : "fragment") << "shader!\n";
-        std::cout << message << "\n";
+        //std::cout << "falied to compile " << (type == GL_VERTEX_SHADER ? "vertex" : "fragment") << "shader!\n";
+        //std::cout << message << "\n";
 
         glDeleteShader(id);
         return 0;
@@ -180,6 +180,9 @@ int main()
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
 
+    // reduce the frame rate for color animation
+    glfwSwapInterval(1);
+
     // Initialize GLEW after creating a valid OpenGL context
     if (glewInit() != GLEW_OK)
     {
@@ -187,7 +190,7 @@ int main()
         return -1;
     }
 
-    std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << "\n";
+    //std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << "\n";
 
     // Define vertices for a triangle
     float position[] = {
@@ -198,7 +201,7 @@ int main()
         // 0.5f,  0.5f, // Vertex 1
         -0.5f,  0.5f, // Vertex 2   index 3
         //-0.5f, -0.5f  // Vertex 3
-    };
+    }; 
 
     // index buffer 
     int index[] =
@@ -236,14 +239,27 @@ int main()
 
     shaderProgramSource source = paraseShader("C:/Users/anscer/Desktop/me/cpp/openGl/started - openGL - glfw - glew/res/shader/basic.shader");
 
-    std::cout << "vertex shader: " << source.vertexSource << "\n";
-    std::cout << "fragment shader: " << source.fragmentSource << "\n"; 
+    //std::cout << "vertex shader: " << source.vertexSource << "\n";
+    //std::cout << "fragment shader: " << source.fragmentSource << "\n"; 
 
     // calling shader program
     unsigned int shader = createShader(source.vertexSource,source.fragmentSource);
 
     // bind the shader
     glUseProgram(shader);
+
+    // calling uniform 
+    // uniform is used to send color data to the shader
+    // extracting the position of the uniform
+    int location = glGetUniformLocation(shader, "u_Color");
+    ASSERT(location != -1);
+
+    // setting the color values 
+    GLCall(glUniform4f(location, 0.8f, 0.3f, 0.8f, 1.0f));
+
+    // animating the color
+    float r = 0.0f;
+    float increment = 0.05f;
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -254,8 +270,20 @@ int main()
         // clearing the errors
         //glClearError();
 
+        // setting the color values 
+        GLCall(glUniform4f(location, r, 0.3f, 0.8f, 1.0f));
+        
         // drawing rectangle from index array
-        GLCall(glDrawElements(GL_TRIANGLES, 6, GL_INT, nullptr));
+        GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
+
+        // setting r
+        if (r > 1.0f)
+            increment = -0.05f;
+        else if (r < 0.0f)
+        {
+            increment = 0.05f;
+        }
+        r += increment;
 
         // checking the errors in opengl
         // by using assert we can stop the execution 
