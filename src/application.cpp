@@ -3,7 +3,7 @@
 #include <GLFW/glfw3.h>
 #include <fstream> // added for reading the files
 #include <string>
-#include <sstream> 
+#include <sstream>
 
 // adding asser function for using error debug
 #define ASSERT(x) if (!(x)) __debugbreak();
@@ -169,6 +169,11 @@ int main()
     if (!glfwInit())
         return -1;
 
+    // setting up opengl profile 
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
+
     /* Create a windowed mode window and its OpenGL context */
     window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
     if (!window)
@@ -231,7 +236,7 @@ int main()
     unsigned int ibo;
     glGenBuffers(1, &ibo);
 
-    // Bind the buffer to the GL_ARRAY_BUFFER target
+    // Bind the buffer to the GL_ARRAY_BUFFER target(index buffer)
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 
     // Upload the vertex data to the GPU
@@ -254,9 +259,15 @@ int main()
     int location = glGetUniformLocation(shader, "u_Color");
     ASSERT(location != -1);
 
-    // setting the color values 
+    // setting the color values using uniforms
     GLCall(glUniform4f(location, 0.8f, 0.3f, 0.8f, 1.0f));
 
+    // for testing some thing
+    // unbinding everything
+    glUseProgram(0);
+    glBindBuffer(GL_ARRAY_BUFFER, 0);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    
     // animating the color
     float r = 0.0f;
     float increment = 0.05f;
@@ -270,10 +281,23 @@ int main()
         // clearing the errors
         //glClearError();
 
-        // setting the color values 
+        // binding everyting again 1 . shader
+        glUseProgram(shader);
+        
+        // setting the color values using uniform 2 . setting up uniform
         GLCall(glUniform4f(location, r, 0.3f, 0.8f, 1.0f));
         
-        // drawing rectangle from index array
+        // after use programe bind the curresponding program 3 .binding the vertex buffer
+        glBindBuffer(GL_ARRAY_BUFFER, buffer);
+
+        // enable vertex attributes which we disables  4 . setting up the tex buffer
+        glEnableVertexAttribArray(buffer);
+        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
+
+        // 5 . binding the index buffer
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+
+        // drawing rectangle from index array 6. calling the gldraw for drawing the elements.
         GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
 
         // setting r
