@@ -4,46 +4,7 @@
 #include <fstream> // added for reading the files
 #include <string>
 #include <sstream>
-
-// adding asser function for using error debug
-#define ASSERT(x) if (!(x)) __debugbreak();
-
-// another methode by using macro
-// in this passing a variable x to  the function glcall
-// first glclearerror will execute
-// then x is executed which means the function which is wrapooed in sid ethe glcall
-// once that is done the gllogcall will check the erros 
-// if te error is there it will stop the execution otherwise resume.
-// the funtion gllogcall is taiking arguments 
-//  #x  (stringified version of x basically it is the function name will send as a string)
-#define GLCall(x) glClearError();\
-    x;\
-    ASSERT(glLogCall(#x, __FILE__,__LINE__))
-
-// error handeling
-static void glClearError()
-{
-    // when there is error call this should be reset sll the other errors 
-    while (glGetError() != GL_NO_ERROR)
-    {
-        // code for error clearing 
-    }   
-}
-
-// print error by using glGetError from opengl
-// adding more contents to the function like the function name , line etc
-static bool glLogCall(const char* function, const char* file, int line)
-{
-    // function for print error
-    while (GLenum error = glGetError())
-    {
-        std::cout << "(openGl error : " << error << "), function : "
-        << function << " file name : " << file << " line number : " << line 
-        <<"\n";
-        return false;
-    }
-    return true;
-}
+#include "renderer.h"
 
 struct shaderProgramSource
 {
@@ -172,7 +133,7 @@ int main()
     // setting up opengl profile 
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     /* Create a windowed mode window and its OpenGL context */
     window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
@@ -215,11 +176,16 @@ int main()
         2, 3, 0 // index = 2, 3, 0 for the second triangle
     };
 
+    // creating vertex arrays
+    unsigned int vao;
+    GLCall(glGenVertexArrays(1, &vao));
+    GLCall(glBindVertexArray(vao));
+
     // Generate a buffer
     unsigned int buffer;
     glGenBuffers(1, &buffer);
 
-    // Bind the buffer to the GL_ARRAY_BUFFER target
+    // Bind the buffer to the GL_ARRAY_BUFFER target 
     glBindBuffer(GL_ARRAY_BUFFER, buffer);
 
     // Upload the vertex data to the GPU
@@ -255,18 +221,21 @@ int main()
 
     // calling uniform 
     // uniform is used to send color data to the shader
-    // extracting the position of the uniform
+    // extracting the position of the uniform 
     int location = glGetUniformLocation(shader, "u_Color");
     ASSERT(location != -1);
 
     // setting the color values using uniforms
     GLCall(glUniform4f(location, 0.8f, 0.3f, 0.8f, 1.0f));
 
+    // Bind vertex array to 0 for making it to bind with the vertex array with the future
+    glBindVertexArray(0);
+
     // for testing some thing
     // unbinding everything
-    glUseProgram(0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+    GLCall(glUseProgram(0));
+    GLCall((GL_ARRAY_BUFFER, 0));
+    GLCall((GL_ELEMENT_ARRAY_BUFFER, 0));
     
     // animating the color
     float r = 0.0f;
@@ -282,20 +251,23 @@ int main()
         //glClearError();
 
         // binding everyting again 1 . shader
-        glUseProgram(shader);
+        GLCall(glUseProgram(shader));
         
         // setting the color values using uniform 2 . setting up uniform
         GLCall(glUniform4f(location, r, 0.3f, 0.8f, 1.0f));
+
+        // binding with the vertex array here,not binding the vertex buffer 
+        glBindVertexArray(vao);
         
         // after use programe bind the curresponding program 3 .binding the vertex buffer
-        glBindBuffer(GL_ARRAY_BUFFER, buffer);
+        //GLCall(glBindBuffer(GL_ARRAY_BUFFER, buffer));
 
         // enable vertex attributes which we disables  4 . setting up the tex buffer
-        glEnableVertexAttribArray(buffer);
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
+        //GLCall(glEnableVertexAttribArray(buffer));
+        //GLCall(glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0));
 
         // 5 . binding the index buffer
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
+        GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo));
 
         // drawing rectangle from index array 6. calling the gldraw for drawing the elements.
         GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr));
@@ -314,10 +286,10 @@ int main()
         //ASSERT(glLogCall());
 
         // Draw the triangle (3 vertices)
-        glDrawArrays(GL_TRIANGLES, 0, 6);
+        GLCall(glDrawArrays(GL_TRIANGLES, 0, 6));
 
         /* Swap front and back buffers */
-        glfwSwapBuffers(window);
+        GLCall(glfwSwapBuffers(window));
 
         /* Poll for and process events */
         glfwPollEvents();
